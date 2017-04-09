@@ -1,13 +1,4 @@
-appdirs==1.4.0
-numpy==1.12.0
-packaging==16.8
-pbr==1.10.0
-protobuf==3.0.0b2
-pyparsing==2.1.10
+numpy==1.12.1
+protobuf==3.2.0
 six==1.10.0
-stevedore==1.20.0
-tensorflow==0.7.1
-virtualenv==15.1.0
-virtualenv-clone==0.2.6
-virtualenvwrapper==4.7.2
-wheel==0.29.0
+tensorflow==1.0.1
