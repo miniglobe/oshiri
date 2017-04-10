@@ -37,18 +37,21 @@ class NWModel(object):
         loss = tf.contrib.seq2seq.sequence_loss(logits, targets, weights)
         return tf.reduce_sum(loss) / batch_size
 
-#self.learning_rateを定義すること
+
     def training(self, cost):
         optimizer = tf.train.AdamOptimizer(learning_rate=self.learning_rate).minimize(cost)
         return optimizer
+
 
     @property
     def input(self):
         return self._input
 
+
     @property
     def initial_state(self):
         return self._initial_state
+
 
     def ptb_producer(self, raw_data, batch_size, num_steps, name=None):
         with tf.name_scope("PTBProducer"):
