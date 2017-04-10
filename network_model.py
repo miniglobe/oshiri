@@ -53,8 +53,8 @@ class NWModel(object):
         return self._initial_state
 
 
-    def ptb_producer(self, raw_data, batch_size, num_steps, name=None):
-        with tf.name_scope("PTBProducer"):
+    def input_producer(self, raw_data, batch_size, num_steps, name=None):
+        with tf.name_scope("InputProducer"):
             raw_data = tf.convert_to_tensor(raw_data, name="raw_data", dtype=tf.int32)
             data_len = tf.size(raw_data)
             batch_len = data_len // batch_size
