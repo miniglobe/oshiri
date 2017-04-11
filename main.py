@@ -26,8 +26,7 @@ tf.app.flags.DEFINE_integer("batch_size", 64,
                             "Batch size to use during training.")
 tf.app.flags.DEFINE_integer("size", 1024, "Size of each model layer.")
 tf.app.flags.DEFINE_integer("num_layers", 3, "Number of layers in the model.")
-tf.app.flags.DEFINE_integer("from_vocab_size", 40000, "English vocabulary size.")
-tf.app.flags.DEFINE_integer("to_vocab_size", 40000, "French vocabulary size.")
+tf.app.flags.DEFINE_integer("vocab_size", 40000, "vocabulary size.")
 tf.app.flags.DEFINE_string("data_dir", "/tmp", "Data directory")
 tf.app.flags.DEFINE_string("train_dir", "/tmp", "Training directory.")
 tf.app.flags.DEFINE_string("from_train_data", None, "Training data.")
@@ -126,8 +125,7 @@ def create_model(session, forward_only):
   """Create translation model and initialize or load parameters in session."""
   dtype = tf.float16 if FLAGS.use_fp16 else tf.float32
   model = network_model.NWModel(
-      FLAGS.from_vocab_size,
-      FLAGS.to_vocab_size,
+      FLAGS.vocab_size,
       _buckets,
       FLAGS.size,
       FLAGS.num_layers,
@@ -167,13 +165,12 @@ def train():
         to_train_data,
         from_dev_data,
         to_dev_data,
-        FLAGS.from_vocab_size,
-        FLAGS.to_vocab_size)
+        FLAGS.vocab_size,)
   else:
       # Prepare WMT data.
       print("Preparing WMT data in %s" % FLAGS.data_dir)
       from_train, to_train, from_dev, to_dev, _, _ = data_utils.prepare_wmt_data(
-          FLAGS.data_dir, FLAGS.from_vocab_size, FLAGS.to_vocab_size)
+          FLAGS.data_dir, FLAGS.from_vocab_size, FLAGS.vocab_size)
 
   with tf.Session() as sess:
     # Create model.
@@ -253,9 +250,9 @@ def decode():
 
     # Load vocabularies.
     en_vocab_path = os.path.join(FLAGS.data_dir,
-                                 "vocab%d.from" % FLAGS.from_vocab_size)
+                                 "vocab%d.from" % FLAGS.vocab_size)
     fr_vocab_path = os.path.join(FLAGS.data_dir,
-                                 "vocab%d.to" % FLAGS.to_vocab_size)
+                                 "vocab%d.to" % FLAGS.vocab_size)
     en_vocab, _ = data_utils.initialize_vocabulary(en_vocab_path)
     _, rev_fr_vocab = data_utils.initialize_vocabulary(fr_vocab_path)
 

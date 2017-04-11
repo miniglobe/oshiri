@@ -27,8 +27,7 @@ class NWModel(object):
 
 
   def __init__(self,
-               source_vocab_size,
-               target_vocab_size,
+               vocab_size,
                buckets,
                size,
                num_layers,
@@ -41,8 +40,7 @@ class NWModel(object):
                dtype=tf.float32):
     """Create the model.
     Args:
-      source_vocab_size: size of the source vocabulary.
-      target_vocab_size: size of the target vocabulary.
+      vocab_size: size of the vocabulary.
       buckets: a list of pairs (I, O), where I specifies maximum input length
         that will be processed in that bucket, and O specifies maximum output
         length. Training instances that have inputs longer than I or outputs
@@ -61,8 +59,7 @@ class NWModel(object):
       forward_only: if set, we do not construct the backward pass in the model.
       dtype: the data type to use to store internal variables.
     """
-    self.source_vocab_size = source_vocab_size
-    self.target_vocab_size = target_vocab_size
+    self.vocab_size = vocab_size
     self.buckets = buckets
     self.batch_size = batch_size
     self.learning_rate = tf.Variable(
@@ -75,10 +72,10 @@ class NWModel(object):
     output_projection = None
     softmax_loss_function = None
     # Sampled softmax only makes sense if we sample less than vocabulary size.
-    if num_samples > 0 and num_samples < self.target_vocab_size:
-      w_t = tf.get_variable("proj_w", [self.target_vocab_size, size], dtype=dtype)
+    if num_samples > 0 and num_samples < self.vocab_size:
+      w_t = tf.get_variable("proj_w", [self.vocab_size, size], dtype=dtype)
       w = tf.transpose(w_t)
-      b = tf.get_variable("proj_b", [self.target_vocab_size], dtype=dtype)
+      b = tf.get_variable("proj_b", [self.vocab_size], dtype=dtype)
       output_projection = (w, b)
 
       def sampled_loss(labels, logits):
@@ -95,7 +92,7 @@ class NWModel(object):
                 labels=labels,
                 inputs=local_inputs,
                 num_sampled=num_samples,
-                num_classes=self.target_vocab_size),
+                num_classes=self.vocab_size),
             dtype)
       softmax_loss_function = sampled_loss
 
@@ -113,8 +110,8 @@ class NWModel(object):
           encoder_inputs,
           decoder_inputs,
           cell,
-          num_encoder_symbols=source_vocab_size,
-          num_decoder_symbols=target_vocab_size,
+          num_encoder_symbols=vocab_size,
+          num_decoder_symbols=vocab_size,
           embedding_size=size,
           output_projection=output_projection,
           feed_previous=do_decode,
