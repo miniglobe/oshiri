@@ -11,7 +11,7 @@ import tensorflow as tf
 from . import data_utils
 
 
-class Seq2SeqModel(object):
+class NWModel(object):
   """Sequence-to-sequence model with attention and for multiple buckets.
   This class implements a multi-layer recurrent neural network as encoder,
   and an attention-based decoder. This is the same as the model described in

@@ -13,8 +13,8 @@ import logging
 import numpy as np
 import tensorflow as tf
 
-import data_utils
-import seq2seq_model
+from model import input_reader
+from model import network_model
 
 
 tf.app.flags.DEFINE_float("learning_rate", 0.5, "Learning rate.")
@@ -125,7 +125,7 @@ def read_data(source_path, target_path, max_size=None):
 def create_model(session, forward_only):
   """Create translation model and initialize or load parameters in session."""
   dtype = tf.float16 if FLAGS.use_fp16 else tf.float32
-  model = seq2seq_model.Seq2SeqModel(
+  model = network_model.NWModel(
       FLAGS.from_vocab_size,
       FLAGS.to_vocab_size,
       _buckets,
@@ -298,7 +298,7 @@ def self_test():
   with tf.Session() as sess:
     print("Self-test for neural translation model.")
     # Create model with vocabularies of 10, 2 small buckets, 2 layers of 32.
-    model = seq2seq_model.Seq2SeqModel(10, 10, [(3, 3), (6, 6)], 32, 2,
+    model = network_model.NWModel(10, 10, [(3, 3), (6, 6)], 32, 2,
                                        5.0, 32, 0.3, 0.99, num_samples=8)
     sess.run(tf.global_variables_initializer())
 
@@ -323,7 +323,3 @@ def main(_):
 
 if __name__ == "__main__":
   tf.app.run()
-
-
-if __name__ == '__main__':
-    main()
