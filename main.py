@@ -1,10 +1,20 @@
 # -*- coding: utf-8 -*-
-import sys
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
 
+import math
+import os
+import random
+import sys
+import time
+import logging
+
+import numpy as np
 import tensorflow as tf
 
-from model import input_reader
-from model.network_model import NWModel
+import data_utils
+import seq2seq_model
 
 
 tf.app.flags.DEFINE_float("learning_rate", 0.5, "Learning rate.")
@@ -111,6 +121,7 @@ def read_data(source_path, target_path, max_size=None):
         source, target = source_file.readline(), target_file.readline()
   return data_set
 
+
 def create_model(session, forward_only):
   """Create translation model and initialize or load parameters in session."""
   dtype = tf.float16 if FLAGS.use_fp16 else tf.float32
@@ -174,14 +185,14 @@ def train():
            % FLAGS.max_train_data_size)
     dev_set = read_data(from_dev, to_dev)
     train_set = read_data(from_train, to_train, FLAGS.max_train_data_size)
-    train_bucket_sizes = [len(train_set[b]) for b in xrange(len(_buckets))]
+    train_bucket_sizes = [len(train_set[b]) for b in range(len(_buckets))]
     train_total_size = float(sum(train_bucket_sizes))
 
     # A bucket scale is a list of increasing numbers from 0 to 1 that we'll use
     # to select a bucket. Length of [scale[i], scale[i+1]] is proportional to
     # the size if i-th training bucket, as used later.
     train_buckets_scale = [sum(train_bucket_sizes[:i + 1]) / train_total_size
-                           for i in xrange(len(train_bucket_sizes))]
+                           for i in range(len(train_bucket_sizes))]
 
     # This is the training loop.
     step_time, loss = 0.0, 0.0
@@ -191,7 +202,7 @@ def train():
       # Choose a bucket according to data distribution. We pick a random number
       # in [0, 1] and use the corresponding interval in train_buckets_scale.
       random_number_01 = np.random.random_sample()
-      bucket_id = min([i for i in xrange(len(train_buckets_scale))
+      bucket_id = min([i for i in range(len(train_buckets_scale))
                        if train_buckets_scale[i] > random_number_01])
 
       # Get a batch and make a step.
@@ -220,7 +231,7 @@ def train():
         model.saver.save(sess, checkpoint_path, global_step=model.global_step)
         step_time, loss = 0.0, 0.0
         # Run evals on development set and print their perplexity.
-        for bucket_id in xrange(len(_buckets)):
+        for bucket_id in range(len(_buckets)):
           if len(dev_set[bucket_id]) == 0:
             print("  eval: empty bucket %d" % (bucket_id))
             continue
@@ -294,7 +305,7 @@ def self_test():
     # Fake data set for both the (3, 3) and (6, 6) bucket.
     data_set = ([([1, 1], [2, 2]), ([3, 3], [4]), ([5], [6])],
                 [([1, 1, 1, 1, 1], [2, 2, 2, 2, 2]), ([3, 3, 3], [5, 6])])
-    for _ in xrange(5):  # Train the fake model for 5 steps.
+    for _ in range(5):  # Train the fake model for 5 steps.
       bucket_id = random.choice([0, 1])
       encoder_inputs, decoder_inputs, target_weights = model.get_batch(
           data_set, bucket_id)
