@@ -44,7 +44,7 @@ class NWModel(object):
 
     output_projection = None
     softmax_loss_function = None
-    with tf.device('gpu:0'):
+    with tf.device('/gpu:0'):
         if num_samples > 0 and num_samples < self.target_vocab_size:
           w = tf.get_variable("proj_w", [size, self.target_vocab_size])
           w_t = tf.transpose(w)
