@@ -30,7 +30,7 @@ class NWModel(object):
   def __init__(self, source_vocab_size, target_vocab_size, buckets, size,
                num_layers, max_gradient_norm, batch_size, learning_rate,
                learning_rate_decay_factor, use_lstm=False,
-               num_samples=40001, forward_only=False, dtype=tf.float32):
+               num_samples=20001, forward_only=False, dtype=tf.float32):
 
     self.source_vocab_size = source_vocab_size
     self.target_vocab_size = target_vocab_size
