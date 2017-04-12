@@ -16,6 +16,8 @@ import os
 import re
 import tarfile
 
+import tensorflow as tf
+
 from tensorflow.python.platform import gfile
 from six.moves import urllib
 
