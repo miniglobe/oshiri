@@ -30,7 +30,7 @@ class NWModel(object):
   def __init__(self, source_vocab_size, target_vocab_size, buckets, size,
                num_layers, max_gradient_norm, batch_size, learning_rate,
                learning_rate_decay_factor, use_lstm=False,
-               num_samples=40000, forward_only=False, dtype=tf.float32):
+               num_samples=512, forward_only=False, dtype=tf.float32):
 
     self.source_vocab_size = source_vocab_size
     self.target_vocab_size = target_vocab_size
@@ -51,10 +51,20 @@ class NWModel(object):
       output_projection = (w, b)
 
 
-      def sampled_loss(inputs, labels):
+      def sampled_loss(labels, logits):
         labels = tf.reshape(labels, [-1, 1])
-        return tf.nn.sampled_softmax_loss(w_t, b, inputs, labels, num_samples,
-                                            self.target_vocab_size)
+        local_w_t = tf.cast(w_t, tf.float32)
+        local_b = tf.cast(b, tf.float32)
+        local_inputs = tf.cast(logits, tf.float32)
+        return tf.cast(
+            tf.nn.sampled_softmax_loss(
+                weights=local_w_t,
+                biases=local_b,
+                labels=labels,
+                inputs=local_inputs,
+                num_sampled=num_samples,
+                num_classes=self.target_vocab_size),
+            dtype)
       softmax_loss_function = sampled_loss
 
 
