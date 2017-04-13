@@ -37,8 +37,7 @@ tf.app.flags.DEFINE_integer("batch_size", 4,
                             "Batch size to use during training.")
 tf.app.flags.DEFINE_integer("size", 256, "Size of each model layer.")
 tf.app.flags.DEFINE_integer("num_layers", 2, "Number of layers in the model.")
-tf.app.flags.DEFINE_integer("in_vocab_size", 50000, "input vocabulary size.")
-tf.app.flags.DEFINE_integer("out_vocab_size", 50000, "output vocabulary size.")
+tf.app.flags.DEFINE_integer("vocab_size", 50000, "input vocabulary size.")
 tf.app.flags.DEFINE_string("data_dir", "data", "Data directory")
 tf.app.flags.DEFINE_string("train_dir", "logs", "Training directory.")
 tf.app.flags.DEFINE_integer("max_train_data_size", 0,
@@ -55,33 +54,34 @@ FLAGS = tf.app.flags.FLAGS
 _buckets = [(5, 10), (10, 15), (20, 25), (40, 50)]
 
 
-def read_data(source_path, target_path, max_size=None):
+def read_data(source_path, max_size=None):
   data_set = [[] for _ in _buckets]
   source_file = open(source_path,"r")
-  target_file = open(target_path,"r")
 
-  source, target = source_file.readline(), target_file.readline()
+  current_line = source_file.readline()
+  next_line = source_file.readline()
   counter = 0
-  while source and target and (not max_size or counter < max_size):
+  while next_line and (not max_size or counter < max_size):
     counter += 1
     if counter % 50 == 0:
       print("  reading data line %d" % counter)
       sys.stdout.flush()
 
-    source_ids = [int(x) for x in source.split()]
-    target_ids = [int(x) for x in target.split()]
+    source_ids = [int(x) for x in current_line.split()]
+    target_ids = [int(x) for x in next_line.split()]
     target_ids.append(input_reader.EOS_ID)
     for bucket_id, (source_size, target_size) in enumerate(_buckets):
       if len(source_ids) < source_size and len(target_ids) < target_size:
         data_set[bucket_id].append([source_ids, target_ids])
         break
-    source, target = source_file.readline(), target_file.readline()
+    current_line = next_line
+    next_line = source_file.readline()
   return data_set
 
 
 def create_model(session, forward_only):
   model = network_model.NWModel(
-      FLAGS.in_vocab_size, FLAGS.out_vocab_size, _buckets,
+      FLAGS.vocab_size, FLAGS.vocab_size, _buckets,
       FLAGS.size, FLAGS.num_layers, FLAGS.max_gradient_norm, FLAGS.batch_size,
       FLAGS.learning_rate, FLAGS.learning_rate_decay_factor,
       forward_only=forward_only)
@@ -99,8 +99,8 @@ def create_model(session, forward_only):
 def train():
 
   print("Preparing data in %s" % FLAGS.data_dir)
-  in_train, out_train, in_dev, out_dev, _, _ = input_reader.prepare_data(
-      FLAGS.data_dir, FLAGS.in_vocab_size, FLAGS.out_vocab_size)
+  train, dev, _ = input_reader.prepare_data(
+      FLAGS.data_dir, FLAGS.vocab_size)
 
 
   with tf.Session() as sess:
@@ -111,8 +111,8 @@ def train():
 
     print ("Reading development and training data (limit: %d)."
            % FLAGS.max_train_data_size)
-    dev_set = read_data(in_dev, out_dev)
-    train_set = read_data(in_train, out_train, FLAGS.max_train_data_size)
+    dev_set = read_data(dev)
+    train_set = read_data(train, FLAGS.max_train_data_size)
 
     train_bucket_sizes = [len(train_set[b]) for b in xrange(len(_buckets))]
     train_total_size = float(sum(train_bucket_sizes))

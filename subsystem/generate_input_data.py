@@ -72,26 +72,16 @@ def main():
                 f.write(line)
                 f.write('\n')
 
-    train_in = open('./data/train/train_in.txt', 'w')
-    train_out = open('./data/train/train_out.txt', 'w')
-    test_in = open('./data/train/test_in.txt', 'w')
-    test_out = open('./data/train/test_out.txt', 'w')
-
-    test_files = {'in': test_in, 'out': test_out}
-    train_files = {'in': train_in, 'out': train_out}
+    train_file = open('./data/train/train.txt', 'w')
+    test_file = open('./data/train/test.txt', 'w')
 
     line_count = len(open('./data/train/master_data.txt').readlines())
 
     for i, line in enumerate(open('./data/train/master_data.txt')):
-        files = train_files if i < (line_count / 2) else test_files
-        if i % 2 == 0:
-            files['in'].write(line)
-        else:
-            files['out'].write(line)
-    train_in.close()
-    train_out.close()
-    test_in.close()
-    test_out.close()
+        _file = train_file if i < ((3 * line_count) / 4) else test_file
+        _file.write(line)
+    train_file.close()
+    test_file.close()
 
 
 if __name__ == '__main__':

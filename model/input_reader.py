@@ -16,6 +16,8 @@ import os
 import re
 import tarfile
 
+import tensorflow as tf
+
 from tensorflow.python.platform import gfile
 from six.moves import urllib
 
@@ -122,28 +124,22 @@ def data_to_token_ids(data_path, target_path, vocabulary_path,
   data_file.close()
   tokens_file.close()
 
-def prepare_data(data_dir, in_vocabulary_size, out_vocabulary_size):
+def prepare_data(data_dir, vocabulary_size):
 
   train_path = os.path.join(data_dir, "train_data")
   dev_path = os.path.join(data_dir, "test_data")
 
 
-  out_vocab_path = os.path.join(data_dir, "vocab_out.txt" )
-  in_vocab_path = os.path.join(data_dir, "vocab_in.txt" )
-  create_vocabulary(out_vocab_path, train_path + "_out.txt", out_vocabulary_size)
-  create_vocabulary(in_vocab_path, train_path + "_in.txt", in_vocabulary_size)
+  vocab_path = os.path.join(data_dir, "vocab.txt" )
+  create_vocabulary(vocab_path, train_path + ".txt", vocabulary_size)
 
-  out_train_ids_path = train_path + ("_ids_out.txt" )
-  in_train_ids_path = train_path + ("_ids_in.txt" )
-  data_to_token_ids(train_path + "_out.txt", out_train_ids_path, out_vocab_path)
-  data_to_token_ids(train_path + "_in.txt", in_train_ids_path, in_vocab_path)
+  train_ids_path = train_path + ("_ids.txt" )
+  data_to_token_ids(train_path + ".txt", train_ids_path, vocab_path)
 
 
-  out_dev_ids_path = dev_path + ("_ids_out.txt" )
-  in_dev_ids_path = dev_path + ("_ids_in.txt" )
-  data_to_token_ids(dev_path + "_out.txt", out_dev_ids_path, out_vocab_path)
-  data_to_token_ids(dev_path + "_in.txt", in_dev_ids_path, in_vocab_path)
+  dev_ids_path = dev_path + ("_ids.txt" )
+  data_to_token_ids(dev_path + ".txt", dev_ids_path, vocab_path)
 
-  return (in_train_ids_path, out_train_ids_path,
-          in_dev_ids_path, out_dev_ids_path,
-          in_vocab_path, out_vocab_path)
+  return (train_ids_path,
+          dev_ids_path,
+          vocab_path)
