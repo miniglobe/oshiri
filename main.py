@@ -174,7 +174,7 @@ def decode():
     model.batch_size = 1
 
     vocab_path = os.path.join(FLAGS.data_dir,
-                                 "vocab_in.txt")
+                                 "vocab.txt")
     vocab, _ = input_reader.initialize_vocabulary(vocab_path)
 
 
