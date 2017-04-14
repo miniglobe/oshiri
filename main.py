@@ -173,13 +173,9 @@ def decode():
     model = create_model(sess, True)
     model.batch_size = 1
 
-    in_vocab_path = os.path.join(FLAGS.data_dir,
+    vocab_path = os.path.join(FLAGS.data_dir,
                                  "vocab_in.txt")
-    out_vocab_path = os.path.join(FLAGS.data_dir,
-                                 "vocab_out.txt" )
-
-    in_vocab, _ = input_reader.initialize_vocabulary(in_vocab_path)
-    _, rev_out_vocab = input_reader.initialize_vocabulary(out_vocab_path)
+    vocab, _ = input_reader.initialize_vocabulary(vocab_path)
 
 
     sys.stdout.write("> ")
@@ -188,7 +184,7 @@ def decode():
     while sentence:
 
        # Get token-ids for the input sentence.
-      token_ids = input_reader.sentence_to_token_ids(tf.compat.as_bytes(sentence), in_vocab)
+      token_ids = input_reader.sentence_to_token_ids(tf.compat.as_bytes(sentence), vocab)
       # Which bucket does it belong to?
       bucket_id = len(_buckets) - 1
       for i, bucket in enumerate(_buckets):
@@ -210,7 +206,7 @@ def decode():
       if input_reader.EOS_ID in outputs:
         outputs = outputs[:outputs.index(input_reader.EOS_ID)]
       # Print out French sentence corresponding to outputs.
-      print(" ".join([tf.compat.as_str(rev_out_vocab[output]) for output in outputs]))
+      print(" ".join([tf.compat.as_str(vocab[output]) for output in outputs]))
       print("> ", end="")
       sys.stdout.flush()
       sentence = sys.stdin.readline()
