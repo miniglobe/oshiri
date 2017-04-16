@@ -1,12 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -183,9 +177,7 @@ def decode():
     sentence = sys.stdin.readline()
     while sentence:
 
-       # Get token-ids for the input sentence.
       token_ids = input_reader.sentence_to_token_ids(tf.compat.as_bytes(sentence), vocab)
-      # Which bucket does it belong to?
       bucket_id = len(_buckets) - 1
       for i, bucket in enumerate(_buckets):
         if bucket[0] >= len(token_ids):
@@ -194,18 +186,13 @@ def decode():
       else:
         logging.warning("Sentence truncated: %s", sentence)
 
-      # Get a 1-element batch to feed the sentence to the model.
       encoder_inputs, decoder_inputs, target_weights = model.get_batch(
           {bucket_id: [(token_ids, [])]}, bucket_id)
-      # Get output logits for the sentence.
       _, _, output_logits = model.step(sess, encoder_inputs, decoder_inputs,
                                        target_weights, bucket_id, True)
-      # This is a greedy decoder - outputs are just argmaxes of output_logits.
       outputs = [int(np.argmax(logit, axis=1)) for logit in output_logits]
-      # If there is an EOS symbol in outputs, cut them at that point.
       if input_reader.EOS_ID in outputs:
         outputs = outputs[:outputs.index(input_reader.EOS_ID)]
-      # Print out French sentence corresponding to outputs.
       print(" ".join([tf.compat.as_str(rev_vocab[output]) for output in outputs]))
       print("> ", end="")
       sys.stdout.flush()
