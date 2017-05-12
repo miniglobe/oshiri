@@ -53,29 +53,28 @@ def basic_tokenizer(sentence):
 def create_vocabulary(vocabulary_path, data_path, max_vocabulary_size,
                       tokenizer=None, normalize_digits=True):
 
-  if not gfile.Exists(vocabulary_path):
-    print("Creating vocabulary %s from data %s" % (vocabulary_path, data_path))
-    vocab = {}
-    with gfile.GFile(data_path, mode="rb") as f:
-      counter = 0
-      for line in f:
-        counter += 1
-        if counter % 500 == 0:
-          print("  processing line %d" % counter)
-        line = tf.compat.as_bytes(line)
-        tokens = tokenizer(line) if tokenizer else basic_tokenizer(line)
-        for w in tokens:
-          word = _DIGIT_RE.sub(b"0", w) if normalize_digits else w
-          if word in vocab:
-            vocab[word] += 1
-          else:
-            vocab[word] = 1
-      vocab_list = _START_VOCAB + sorted(vocab, key=vocab.get, reverse=True)
-      if len(vocab_list) > max_vocabulary_size:
-        vocab_list = vocab_list[:max_vocabulary_size]
-      with gfile.GFile(vocabulary_path, mode="wb") as vocab_file:
-        for w in vocab_list:
-          vocab_file.write(w + b"\n")
+  print("Creating vocabulary %s from data %s" % (vocabulary_path, data_path))
+  vocab = {}
+  with gfile.GFile(data_path, mode="rb") as f:
+    counter = 0
+    for line in f:
+      counter += 1
+      if counter % 500 == 0:
+        print("  processing line %d" % counter)
+      line = tf.compat.as_bytes(line)
+      tokens = tokenizer(line) if tokenizer else basic_tokenizer(line)
+      for w in tokens:
+        word = _DIGIT_RE.sub(b"0", w) if normalize_digits else w
+        if word in vocab:
+          vocab[word] += 1
+        else:
+          vocab[word] = 1
+    vocab_list = _START_VOCAB + sorted(vocab, key=vocab.get, reverse=True)
+    if len(vocab_list) > max_vocabulary_size:
+      vocab_list = vocab_list[:max_vocabulary_size]
+    with gfile.GFile(vocabulary_path, mode="wb") as vocab_file:
+      for w in vocab_list:
+        vocab_file.write(w + b"\n")
   
 
 def morpheme_vocablary(data_path, vocablary_path=None):
@@ -125,19 +124,18 @@ def sentence_to_token_ids(sentence, vocabulary,
 def data_to_token_ids(data_path, target_path, vocabulary_path,
                       tokenizer=None, normalize_digits=True):
 
-  if not gfile.Exists(target_path):
-    print("Tokenizing data in %s" % data_path)
-    vocab, _ = initialize_vocabulary(vocabulary_path)
-    with gfile.GFile(data_path, mode="rb") as data_file:
-      with gfile.GFile(target_path, mode="w") as tokens_file:
-        counter = 0
-        for line in data_file:
-          counter += 1
-          if counter % 500 == 0:
-            print("  tokenizing line %d" % counter)
-          token_ids = sentence_to_token_ids(tf.compat.as_bytes(line), vocab,
-                                            tokenizer, normalize_digits)
-          tokens_file.write(" ".join([str(tok) for tok in token_ids]) + "\n")
+  print("Tokenizing data in %s" % data_path)
+  vocab, _ = initialize_vocabulary(vocabulary_path)
+  with gfile.GFile(data_path, mode="rb") as data_file:
+    with gfile.GFile(target_path, mode="w") as tokens_file:
+      counter = 0
+      for line in data_file:
+        counter += 1
+        if counter % 500 == 0:
+          print("  tokenizing line %d" % counter)
+        token_ids = sentence_to_token_ids(tf.compat.as_bytes(line), vocab,
+                                          tokenizer, normalize_digits)
+        tokens_file.write(" ".join([str(tok) for tok in token_ids]) + "\n")
 
 def prepare_data(data_dir, vocabulary_size, tokenizer=None):
 
@@ -157,10 +155,10 @@ def prepare_data(data_dir, vocabulary_size, tokenizer=None):
 
   # Create token ids for the training data.
   train_ids_path = train_data_path + ".ids"
-  data_to_token_ids(train_data_path, train_ids_path, train_vocab_path, tokenizer)
+  data_to_token_ids(train_morpheme_path, train_ids_path, train_vocab_path, tokenizer)
 
   # Create token ids for the development data.
   dev_ids_path = test_data_path + ".ids"
-  data_to_token_ids(test_data_path, dev_ids_path, test_vocab_path, tokenizer)
+  data_to_token_ids(test_morpheme_path, dev_ids_path, test_vocab_path, tokenizer)
 
   return (train_ids_path, dev_ids_path, train_vocab_path, test_vocab_path)
