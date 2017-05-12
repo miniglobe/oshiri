@@ -24,6 +24,7 @@ import tarfile
 
 from tensorflow.python.platform import gfile
 import tensorflow as tf
+import MeCab
 
 # Special vocabulary symbols - we always put them at the start.
 _PAD = b"_PAD"
@@ -75,7 +76,25 @@ def create_vocabulary(vocabulary_path, data_path, max_vocabulary_size,
       with gfile.GFile(vocabulary_path, mode="wb") as vocab_file:
         for w in vocab_list:
           vocab_file.write(w + b"\n")
+  
 
+def morpheme_vocablary(data_path, vocablary_path=None):
+
+  m = MeCab.Tagger()
+  with tf.gfile.GFile(data_path, mode="r") as data_file:
+      line = data_file.readline()
+      vocab_list = ""
+      while line:
+          res = m.parse(line)
+          l = res.split('\n')
+          one_line = ""
+          for e in l:
+              one_line += e.split('\t')[0] + ' '
+          one_line = one_line.replace('EOS',' ')
+          vocab_list += one_line.strip() + '\n'
+          line = data_file.readline()
+      with gfile.GFile(vocablary_path, mode="wb") as vocab_file:
+          vocab_file.write(vocab_list)
 
 def initialize_vocabulary(vocabulary_path):
 
@@ -125,11 +144,16 @@ def prepare_data(data_dir, vocabulary_size, tokenizer=None):
   # Create vocabularies of the appropriate sizes.
   train_data_path = os.path.join(data_dir, "train_data.txt")
   test_data_path = os.path.join(data_dir, "test_data.txt")
+  train_morpheme_path = os.path.join(data_dir, "vocab_morpheme.train")
+  test_morpheme_path = os.path.join(data_dir, "vocab_morpheme.test")
   train_vocab_path = os.path.join(data_dir, "vocab%d.train" % vocabulary_size)
   test_vocab_path = os.path.join(data_dir, "vocab%d.test" % vocabulary_size)
 
-  create_vocabulary(train_vocab_path, train_data_path , vocabulary_size, tokenizer)
-  create_vocabulary(test_vocab_path, test_data_path , vocabulary_size, tokenizer)
+  morpheme_vocablary(train_data_path, train_morpheme_path)
+  morpheme_vocablary(test_data_path, test_morpheme_path)
+
+  create_vocabulary(train_vocab_path, train_morpheme_path , vocabulary_size, tokenizer)
+  create_vocabulary(test_vocab_path, test_morpheme_path , vocabulary_size, tokenizer)
 
   # Create token ids for the training data.
   train_ids_path = train_data_path + ".ids"

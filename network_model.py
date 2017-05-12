@@ -10,7 +10,6 @@ import numpy as np
 from six.moves import xrange  # pylint: disable=redefined-builtin
 import tensorflow as tf
 import input_reader
-#import data_utils
 
 class NWModel(object):
 

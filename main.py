@@ -15,6 +15,7 @@ import tensorflow as tf
 
 import input_reader
 import network_model
+import MeCab
 
 
 tf.app.flags.DEFINE_float("learning_rate", 0.5, "Learning rate.")
@@ -25,8 +26,9 @@ tf.app.flags.DEFINE_integer("batch_size", 64,
                             "Batch size to use during training.")
 tf.app.flags.DEFINE_integer("size", 512, "Size of each model layer.")
 tf.app.flags.DEFINE_integer("num_layers", 3, "Number of layers in the model.")
-tf.app.flags.DEFINE_integer("vocab_size", 10000, "vocabulary size.")
+tf.app.flags.DEFINE_integer("vocab_size", 1500, "vocabulary size.")
 tf.app.flags.DEFINE_string("data_dir", "data", "Data directory")
+tf.app.flags.DEFINE_string("ckpt_dir", "ckpt", "Checkpoint directory")
 tf.app.flags.DEFINE_string("train_dir", "ckpt", "Training directory.")
 tf.app.flags.DEFINE_string("train_data", None, "Training data.")
 tf.app.flags.DEFINE_string("dev_data", None, "Training data.")
@@ -88,7 +90,7 @@ def create_model(session, forward_only):
       forward_only = forward_only,
       )
 
-  ckpt = tf.train.get_checkpoint_state(FLAGS.data_dir)
+  ckpt = tf.train.get_checkpoint_state(FLAGS.ckpt_dir)
   if ckpt and tf.train.checkpoint_exists(ckpt.model_checkpoint_path):
     print("Reading model parameters from %s" % ckpt.model_checkpoint_path)
     model.saver.restore(session, ckpt.model_checkpoint_path)
@@ -157,7 +159,7 @@ def train():
             sess.run(model.learning_rate_decay_op)
           previous_losses.append(loss)
           # Save checkpoint and zero timer and loss.
-          checkpoint_path = os.path.join(FLAGS.data_dir, "translate.ckpt")
+          checkpoint_path = os.path.join(FLAGS.ckpt_dir, "main.ckpt")
           model.saver.save(sess, checkpoint_path, global_step=model.global_step)
           step_time, loss = 0.0, 0.0
           # Run evals on development set and print their perplexity.
@@ -179,13 +181,13 @@ def decode():
   with tf.Session() as sess:
     # Create model and load parameters.
     print("Hello!!")
+
     model = create_model(sess, True)
     model.batch_size = 1  # We decode one sentence at a time.
 
     # Load vocabularies.
-    en_vocab_path = os.path.join(FLAGS.data_dir, "train_data.txt")
-    en_vocab, _ = data_utils.initialize_vocabulary(en_vocab_path)
-    _, rev_fr_vocab = data_utils.initialize_vocabulary(fr_vocab_path)
+    train_vocab_path = os.path.join(FLAGS.data_dir, "vocab%d.train" % FLAGS.vocab_size)
+    train_vocab, test_vocab = input_reader.initialize_vocabulary(train_vocab_path)
 
     # Decode from standard input.
     sys.stdout.write("> ")
@@ -193,7 +195,7 @@ def decode():
     sentence = sys.stdin.readline()
     while sentence:
       # Get token-ids for the input sentence.
-      token_ids = data_utils.sentence_to_token_ids(tf.compat.as_bytes(sentence), en_vocab)
+      token_ids = input_reader.sentence_to_token_ids(tf.compat.as_bytes(sentence), train_vocab)
       # Which bucket does it belong to?
       bucket_id = len(_buckets) - 1
       for i, bucket in enumerate(_buckets):
@@ -212,10 +214,10 @@ def decode():
       # This is a greedy decoder - outputs are just argmaxes of output_logits.
       outputs = [int(np.argmax(logit, axis=1)) for logit in output_logits]
       # If there is an EOS symbol in outputs, cut them at that point.
-      if data_utils.EOS_ID in outputs:
-        outputs = outputs[:outputs.index(data_utils.EOS_ID)]
+      if input_reader.EOS_ID in outputs:
+        outputs = outputs[:outputs.index(input_reader.EOS_ID)]
       # Print out French sentence corresponding to outputs.
-      print(" ".join([tf.compat.as_str(rev_fr_vocab[output]) for output in outputs]))
+      print(" ".join([tf.compat.as_str(test_vocab[output]) for output in outputs]))
       print("> ", end="")
       sys.stdout.flush()
       sentence = sys.stdin.readline()
