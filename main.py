@@ -187,7 +187,7 @@ def decode():
 
     # Load vocabularies.
     train_vocab_path = os.path.join(FLAGS.data_dir, "vocab%d.train" % FLAGS.vocab_size)
-    train_vocab, test_vocab = input_reader.initialize_vocabulary(train_vocab_path)
+    train_vocab, rev_vocab = input_reader.initialize_vocabulary(train_vocab_path)
 
     # Decode from standard input.
     sys.stdout.write("> ")
@@ -217,7 +217,7 @@ def decode():
       if input_reader.EOS_ID in outputs:
         outputs = outputs[:outputs.index(input_reader.EOS_ID)]
       # Print out French sentence corresponding to outputs.
-      print(" ".join([tf.compat.as_str(test_vocab[output]) for output in outputs]))
+      print(" ".join([tf.compat.as_str(rev_vocab[output]) for output in outputs]))
       print("> ", end="")
       sys.stdout.flush()
       sentence = sys.stdin.readline()
