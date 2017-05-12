@@ -197,10 +197,8 @@ def decode():
     sentence = sys.stdin.readline()
     while sentence:
       morpheme = input_reader.morpheme_line(sentence)
-      print("morpheme", morpheme)
       # Get token-ids for the input sentence.
       token_ids = input_reader.sentence_to_token_ids(tf.compat.as_bytes(morpheme), train_vocab)
-      print(token_ids)
       # Which bucket does it belong to?
       bucket_id = len(_buckets) - 1
       for i, bucket in enumerate(_buckets):
