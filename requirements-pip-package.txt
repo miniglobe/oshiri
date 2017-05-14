@@ -1,4 +1,6 @@
+mecab-python3==0.7
 numpy==1.12.1
-protobuf==3.2.0
+protobuf==3.3.0
 six==1.10.0
-tensorflow==1.0.1
+tensorflow==1.0.0
+Werkzeug==0.12.1
