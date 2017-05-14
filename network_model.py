@@ -192,7 +192,6 @@ class NWModel(object):
     # pad them if needed, reverse encoder inputs and add GO to decoder.
     for _ in xrange(self.batch_size):
       encoder_input, decoder_input = random.choice(data[bucket_id])
-      print(len(encoder_input), len(decoder_input))
 
       # Encoder inputs are padded and then reversed.
       encoder_pad = [input_reader.PAD_ID] * (encoder_size - len(encoder_input))
