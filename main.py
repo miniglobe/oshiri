@@ -26,7 +26,7 @@ tf.app.flags.DEFINE_integer("batch_size", 64,
                             "Batch size to use during training.")
 tf.app.flags.DEFINE_integer("size", 512, "Size of each model layer.")
 tf.app.flags.DEFINE_integer("num_layers", 3, "Number of layers in the model.")
-tf.app.flags.DEFINE_integer("vocab_size", 10000, "vocabulary size.")
+tf.app.flags.DEFINE_integer("vocab_size", 30000, "vocabulary size.")
 tf.app.flags.DEFINE_string("data_dir", "data", "Data directory")
 tf.app.flags.DEFINE_string("ckpt_dir", "ckpt", "Checkpoint directory")
 tf.app.flags.DEFINE_string("train_dir", "ckpt", "Training directory.")
@@ -67,6 +67,7 @@ def read_data(source_path, max_size=None):
         sys.stdout.flush()
       source_ids = [int(x) for x in current_line.split()]
       target_ids = [int(x) for x in next_line.split()]
+      target_ids.append(input_reader.EOS_ID)
 
       for bucket_id, (source_size, target_size) in enumerate(_buckets):        
         if len(source_ids) < source_size and len(target_ids) < target_size:    
@@ -195,8 +196,9 @@ def decode():
     sys.stdout.write("> ")
     sys.stdout.flush()
     sentence = sys.stdin.readline()
+    m = MeCab.Tagger()
     while sentence:
-      morpheme = input_reader.morpheme_line(sentence)
+      morpheme = input_reader.morpheme_line(sentence, m)
       # Get token-ids for the input sentence.
       token_ids = input_reader.sentence_to_token_ids(tf.compat.as_bytes(morpheme), train_vocab)
       # Which bucket does it belong to?

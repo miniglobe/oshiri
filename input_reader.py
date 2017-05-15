@@ -76,14 +76,14 @@ def create_vocabulary(vocabulary_path, data_path, max_vocabulary_size,
       for w in vocab_list:
         vocab_file.write(w + b"\n")
 
-def morpheme_line(line):
-  m = MeCab.Tagger()
+def morpheme_line(line, m):
+
   res = m.parse(line)
   l = res.split('\n')
   one_line = ""
   for e in l:
       one_line += e.split('\t')[0] + ' '
-  one_line = one_line.replace('EOS',' ')
+  one_line = one_line.replace('EOS','')
   return one_line
 
 def morpheme_vocablary(data_path, vocablary_path=None):
@@ -93,14 +93,9 @@ def morpheme_vocablary(data_path, vocablary_path=None):
       line = data_file.readline()
       vocab_list = ""
       while line:
-          res = m.parse(line)
-          l = res.split('\n')
-          one_line = ""
-          for e in l:
-              one_line += e.split('\t')[0] + ' '
-          one_line = one_line.replace('EOS',' ')
-          vocab_list += one_line.strip() + '\n'
-          line = data_file.readline()
+        one_line = morpheme_line(line, m)
+        vocab_list += one_line.strip() + '\n'
+        line = data_file.readline()
       with gfile.GFile(vocablary_path, mode="wb") as vocab_file:
           vocab_file.write(vocab_list)
 
