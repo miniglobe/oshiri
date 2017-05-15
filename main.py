@@ -58,9 +58,11 @@ def read_data(source_path, max_size=None):
     current_line = source_file.readline()
     next_line = source_file.readline()
     counter = 0
+    counter_hoge = 0
     while current_line and next_line and (not max_size or counter < max_size):
       if current_line == '\n' or next_line == '\n':
-        print("hogehoge")
+        counter_hoge += 1
+        print("counter_hoge", counter_hoge)
         continue
       counter += 1
       if counter % 500 == 0:
