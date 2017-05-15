@@ -63,6 +63,8 @@ def read_data(source_path, max_size=None):
       if current_line == '\n' or next_line == '\n':
         counter_hoge += 1
         print("counter_hoge", counter_hoge)
+        current_line = next_line
+        next_line = source_file.readline()
         continue
       counter += 1
       if counter % 500 == 0:
