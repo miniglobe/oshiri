@@ -60,6 +60,7 @@ def read_data(source_path, max_size=None):
     counter = 0
     while current_line and next_line and (not max_size or counter < max_size):
       if current_line == '' or next_line == '':
+        print("hogehoge")
         continue
       counter += 1
       if counter % 500 == 0:
