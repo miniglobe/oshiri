@@ -59,7 +59,7 @@ def read_data(source_path, max_size=None):
     next_line = source_file.readline()
     counter = 0
     while current_line and next_line and (not max_size or counter < max_size):
-      if current_line == '' or next_line == '':
+      if current_line == '\n' or next_line == '\n':
         print("hogehoge")
         continue
       counter += 1
@@ -72,7 +72,7 @@ def read_data(source_path, max_size=None):
 
       for bucket_id, (source_size, target_size) in enumerate(_buckets):        
         if len(source_ids) < source_size and len(target_ids) < target_size:    
-          data_set[bucket_id].append([source_ids, target_ids])                 
+          data_set[bucket_id].append([source_ids, target_ids])
           break
       current_line = next_line
       next_line = source_file.readline()
