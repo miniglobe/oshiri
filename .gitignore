@@ -4,3 +4,4 @@ ckpt/*
 data/vocab*
 data/*.ids
 data/*.bk
+.vscode

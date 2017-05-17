@@ -26,7 +26,7 @@ tf.app.flags.DEFINE_integer("batch_size", 64,
                             "Batch size to use during training.")
 tf.app.flags.DEFINE_integer("size", 512, "Size of each model layer.")
 tf.app.flags.DEFINE_integer("num_layers", 3, "Number of layers in the model.")
-tf.app.flags.DEFINE_integer("vocab_size", 30000, "vocabulary size.")
+tf.app.flags.DEFINE_integer("vocab_size", 40000, "vocabulary size.")
 tf.app.flags.DEFINE_string("data_dir", "data", "Data directory")
 tf.app.flags.DEFINE_string("ckpt_dir", "ckpt", "Checkpoint directory")
 tf.app.flags.DEFINE_string("train_dir", "ckpt", "Training directory.")
