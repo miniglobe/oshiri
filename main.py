@@ -222,10 +222,12 @@ def decode():
     sys.stdout.flush()
     sentence = sys.stdin.readline()
     m = MeCab.Tagger()
+    input_ids = []
     while sentence:
       morpheme = input_reader.morpheme_line(sentence, m)
       # Get token-ids for the input sentence.
       token_ids = input_reader.sentence_to_token_ids(tf.compat.as_bytes(morpheme), train_vocab)
+      token_ids = [0] + token_ids
       # Which bucket does it belong to?
       bucket_id = len(_buckets) - 1
       for i, bucket in enumerate(_buckets):
@@ -234,10 +236,11 @@ def decode():
           break
       else:
         logging.warning("Sentence truncated: %s", sentence)
-
+      
+      input_ids += token_ids
       # Get a 1-element batch to feed the sentence to the model.
       encoder_inputs, decoder_inputs, target_weights = model.get_batch(
-          {bucket_id: [(token_ids, [])]}, bucket_id)
+          {bucket_id: [(input_ids, [])]}, bucket_id)
       # Get output logits for the sentence.
       _, _, output_logits = model.step(sess, encoder_inputs, decoder_inputs,
                                        target_weights, bucket_id, True)
@@ -250,6 +253,7 @@ def decode():
       print(" ".join([tf.compat.as_str(rev_vocab[output]) for output in outputs]))
       print("> ", end="")
       sys.stdout.flush()
+      input_ids += [1] + outputs
       sentence = sys.stdin.readline()
 
 
