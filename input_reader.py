@@ -27,16 +27,20 @@ import tensorflow as tf
 import MeCab
 
 # Special vocabulary symbols - we always put them at the start.
+_MYSELF = b"_MYSELF"
+_OPPONENT = b"_OPPONENT"
 _PAD = b"_PAD"
 _GO = b"_GO"
 _EOS = b"_EOS"
 _UNK = b"_UNK"
 _START_VOCAB = [_PAD, _GO, _EOS, _UNK]
 
-PAD_ID = 0
-GO_ID = 1
-EOS_ID = 2
-UNK_ID = 3
+MYSELF_ID = 0
+OPPONENT_ID = 1
+PAD_ID = 2
+GO_ID = 3
+EOS_ID = 4
+UNK_ID = 5
 
 # Regular expressions used to tokenize.
 _WORD_SPLIT = re.compile(b"([.,!?\"':;)(])")
@@ -59,7 +63,7 @@ def create_vocabulary(vocabulary_path, data_path, max_vocabulary_size,
     counter = 0
     for line in f:
       counter += 1
-      if counter % 500 == 0:
+      if counter % 1000 == 0:
         print("  processing line %d" % counter)
       line = tf.compat.as_bytes(line)
       tokens = tokenizer(line) if tokenizer else basic_tokenizer(line)
@@ -135,7 +139,7 @@ def data_to_token_ids(data_path, target_path, vocabulary_path,
       counter = 0
       for line in data_file:
         counter += 1
-        if counter % 500 == 0:
+        if counter % 1000 == 0:
           print("  tokenizing line %d" % counter)
         token_ids = sentence_to_token_ids(tf.compat.as_bytes(line), vocab,
                                           tokenizer, normalize_digits)

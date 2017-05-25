@@ -24,8 +24,8 @@ tf.app.flags.DEFINE_float("max_gradient_norm", 5.0,
                           "Clip gradients to this norm.")
 tf.app.flags.DEFINE_integer("batch_size", 64,
                             "Batch size to use during training.")
-tf.app.flags.DEFINE_integer("size", 1024, "Size of each model layer.")
-tf.app.flags.DEFINE_integer("num_layers", 3, "Number of layers in the model.")
+tf.app.flags.DEFINE_integer("size", 128, "Size of each model layer.")
+tf.app.flags.DEFINE_integer("num_layers", 2, "Number of layers in the model.")
 tf.app.flags.DEFINE_integer("vocab_size", 50000, "vocabulary size.")
 tf.app.flags.DEFINE_string("data_dir", "data", "Data directory")
 tf.app.flags.DEFINE_string("ckpt_dir", "ckpt", "Checkpoint directory")
@@ -49,7 +49,6 @@ FLAGS = tf.app.flags.FLAGS
 # See seq2seq_model.Seq2SeqModel for details of how they work.
 _buckets = [(5, 10), (10, 15), (20, 25), (40, 50)]
 
-
 def read_data(source_path, max_size=None):
   print("source_path", source_path)
 
@@ -58,16 +57,39 @@ def read_data(source_path, max_size=None):
     current_line = source_file.readline()
     next_line = source_file.readline()
     counter = 0
+    l = []
     while current_line and next_line and (not max_size or counter < max_size):
+      arr = []
       if current_line == '\n' or next_line == '\n':
         current_line = next_line
         next_line = source_file.readline()
         continue
       counter += 1
-      if counter % 500 == 0:
+      l += [current_line]
+      length = len(l)
+      count = 0
+      for ids in l:
+        if length % 2 == 1 and count == 0:
+          string = str(input_reader.OPPONENT_ID) + ' ' + ids
+          arr += string.split()
+          judge_id = 1
+        elif length % 2 == 0 and count == 0:
+          string = str(input_reader.MYSELF_ID) + ' ' + ids
+          arr += string.split()
+          judge_id = 0
+        if judge_id == 0:
+          string = str(input_reader.OPPONENT_ID) + ' ' + ids
+          arr += string.split()
+          judge_id = 1
+        elif judge_id == 1:
+          string = str(input_reader.MYSELF_ID) + ' ' + ids
+          arr += string.split()
+          judge_id = 0
+        count += 1
+      if counter % 1000 == 0:
         print("  reading data line %d" % counter)
         sys.stdout.flush()
-      source_ids = [int(x) for x in current_line.split()]
+      source_ids = [int(x) for x in arr]
       target_ids = [int(x) for x in next_line.split()]
       target_ids.append(input_reader.EOS_ID)
 
