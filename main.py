@@ -246,11 +246,11 @@ def decode():
                                        target_weights, bucket_id, True)
       # This is a greedy decoder - outputs are just argmaxes of output_logits.
       outputs = [int(np.argmax(logit, axis=1)) for logit in output_logits]
-      print(outputs)
       # If there is an EOS symbol in outputs, cut them at that point.
       if input_reader.EOS_ID in outputs:
         outputs = outputs[:outputs.index(input_reader.EOS_ID)]
       # Print out French sentence corresponding to outputs.
+      print(outputs)
       print(" ".join([tf.compat.as_str(rev_vocab[output]) for output in outputs]))
       print("> ", end="")
       sys.stdout.flush()
